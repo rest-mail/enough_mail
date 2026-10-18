@@ -6,7 +6,10 @@ import 'response_parser.dart';
 /// Parses status responses
 class StatusParser extends ResponseParser<Mailbox> {
   /// Creates a new parser
-  StatusParser(this.box) : _regex = RegExp(r'(STATUS "[^"]+?" )(.*)');
+  StatusParser(this.box)
+    // The mailbox name is a quoted string or, as Outlook sends INBOX, an
+    // atom (RFC 3501 `mailbox = "INBOX" / astring`).
+    : _regex = RegExp(r'(STATUS (?:"(?:[^"\\]|\\.)*"|[^\s"(]+) )(.*)');
 
   /// The current mailbox
   Mailbox box;

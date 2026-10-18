@@ -58,4 +58,38 @@ void main() {
     expect(processed, true);
     expect(box.messagesExists, 2);
   });
+
+  test('Status of a mailbox named by an atom, as Outlook answers', () {
+    const responseText = 'STATUS INBOX (MESSAGES 231 UNSEEN 12)';
+    final details = ImapResponse()..add(ImapResponseLine(responseText));
+    final box = Mailbox(
+      encodedName: 'INBOX',
+      encodedPath: 'INBOX',
+      flags: [MailboxFlag.inbox],
+      pathSeparator: '/',
+    );
+    final parser = StatusParser(box);
+    final response = Response<Mailbox>()..status = ResponseStatus.ok;
+    final processed = parser.parseUntagged(details, response);
+    expect(processed, true);
+    expect(box.messagesExists, 231);
+    expect(box.messagesUnseen, 12);
+  });
+
+  test('Status of a quoted mailbox name with an escaped quote', () {
+    const responseText = r'STATUS "Say \"hi\"" (MESSAGES 3 UNSEEN 1)';
+    final details = ImapResponse()..add(ImapResponseLine(responseText));
+    final box = Mailbox(
+      encodedName: 'Say "hi"',
+      encodedPath: 'Say "hi"',
+      flags: [],
+      pathSeparator: '/',
+    );
+    final parser = StatusParser(box);
+    final response = Response<Mailbox>()..status = ResponseStatus.ok;
+    final processed = parser.parseUntagged(details, response);
+    expect(processed, true);
+    expect(box.messagesExists, 3);
+    expect(box.messagesUnseen, 1);
+  });
 }
